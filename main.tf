@@ -7,7 +7,7 @@ data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
 
-
+# todo... break things out into modules, someday! today? nope.
 resource "aws_dynamodb_table" "conns" {
   name = "xg-conns-${terraform.workspace}"
   hash_key = "ConnID"
@@ -41,6 +41,7 @@ resource "aws_dynamodb_table" "conns" {
 resource "aws_dynamodb_table" "users" {
   name = "xg-users-${terraform.workspace}"
   hash_key = "UserID"
+  range_key = "Username"
 
   attribute {
     name = "UserID"
