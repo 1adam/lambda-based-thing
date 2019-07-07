@@ -82,7 +82,7 @@ resource "aws_cloudformation_stack" "ws_api" {
     TableName = "xg_ws_conns"
   }
 
-  template_url = file("${path.module}/cf_tpl/websocket.yaml")
+  template_body = file("${path.module}/cf_tpl/websocket.yaml")
   capabilities = ["CAPABILITY_IAM"]
   tags = {
     Project = "xg"
