@@ -122,7 +122,7 @@ resource "aws_cloudformation_stack" "ws_api" {
     TableName = "xg_ws_conns"
   }
 
-  template_body = data.template_body.ws_cf_tpl.rendered
+  template_body = data.template_file.ws_cf_tpl.rendered
   capabilities = ["CAPABILITY_IAM","CAPABILITY_AUTO_EXPAND"]
   tags = {
     Project = "xg"
