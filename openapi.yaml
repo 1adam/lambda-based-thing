@@ -1,0 +1,127 @@
+openapi: 3.0.2
+info:
+  title: "xg-api-app"
+  version: 1.0.1
+  contact:
+    name: "1adam"
+    email: "1adam@users.noreply.github.com"
+components:
+  schemas:
+    connOK:
+      type: object
+      properties:
+        rc:
+          type: integer
+          format: int32
+        cid:
+          type: string
+          format: uuid
+    successfulComm:
+      type: object
+      properties:
+        cid:
+          type: string
+          format: uuid
+        uid:
+          type: string
+          format: uuid
+    connBye:
+      type: object
+      properties:
+        rc:
+          type: integer
+          format: int32
+    err:
+      type: object
+      properties:
+        errCode:
+          type: integer
+          format: int32
+        errMsg:
+          type: string
+  parameters:
+    connID:
+      name: cid
+      in: path
+      required: true
+      description: "connID"
+      schema:
+        type: string
+    newConn:
+      name: uname
+      in: path
+      required: true
+      description: "userName"
+      schema:
+        type: string
+
+paths:
+  /conn/{uname}/new:
+    parameters:
+      - $ref: "#/components/parameters/newConn"
+    post:
+      operationId: mkNewConn
+      summary: conn to xg
+      description: Connect to xg
+      responses:
+        '200':
+          description: Successful conn
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/connOK"
+      tags:
+        - "xg"
+        - "conn_mgmt"
+
+  /conn/{cid}:
+    parameters:
+      - $ref: "#/components/parameters/connID"
+    post:
+      summary: Comm w xg
+      description: Communicate with xg using existing connID
+      operationId: doComms
+      responses:
+        '200':
+          description: Successful comm
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/successfulComm"
+        default:
+          description: "error happen"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/err"
+      tags:
+        - "xg"
+        - "comms"
+
+  /endconn/{cid}:
+    parameters:
+      - $ref: "#/components/parameters/connID"
+    post:
+      summary: Close conn
+      description: Close connection with xg
+      operationId: rmConn
+      responses:
+        '200':
+          description: Closed connection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/connBye"
+        default:
+          description: Error closing conn
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/err"
+      tags:
+        - "xg"
+        - "conn_mgmt"
+
+tags:
+  - name: "xg"
+    description: "api ops for xg"
