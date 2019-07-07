@@ -56,7 +56,7 @@ components:
         type: string
 
 paths:
-  /conn//new/{uname}:
+  /conn/new/{uname}:
     parameters:
       - $ref: "#/components/parameters/newConn"
     post:

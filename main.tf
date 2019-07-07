@@ -68,4 +68,24 @@ resource "aws_api_gateway_rest_api" "main" {
   name = "xg-${terraform.workspace}-api"
   description = "xg api"
   body = file("${path.module}/openapi.yaml")
+  endpoint_configuration {
+    types = [
+      "REGIONAL"
+    ]
+  }
+}
+
+resource "aws_cloudformation_stack" "ws_api" {
+  name = "xg-${terraform.workspace}-ws"
+
+  parameters = {
+    TableName = "xg_ws_conns"
+  }
+
+  template_url = file("${path.module}/cf_tpl/websocket.yaml")
+  capabilities = ["CAPABILITY_IAM"]
+  tags = {
+    Project = "xg"
+    Environment = "${terraform.workspace}"
+  }
 }
