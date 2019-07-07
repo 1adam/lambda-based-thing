@@ -9,7 +9,7 @@ Parameters:
     Description: (Required) The name of the new DynamoDB to store connection identifiers for each connected clients. Minimum 3 characters
     MinLength: 3
     MaxLength: 50
-    AllowedPattern: ^[A-Za-z_]+$
+    AllowedPattern: ^[A-Za-z_]+$$
     ConstraintDescription: 'Required. Can be characters and underscore only. No numbers or special characters allowed.'
 
 Resources:
@@ -18,12 +18,12 @@ Resources:
     Properties:
       Name: SimpleWebSocket
       ProtocolType: WEBSOCKET
-      RouteSelectionExpression: "$request.body.action"
+      RouteSelectionExpression: "$$request.body.action"
   ConnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref SimpleWebSocket
-      RouteKey: $connect
+      RouteKey: $$connect
       AuthorizationType: NONE
       OperationName: ConnectRoute
       Target: !Join
@@ -38,12 +38,12 @@ Resources:
       IntegrationType: AWS_PROXY
       IntegrationUri: 
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnConnectFunction.Arn}/invocations
+            arn:aws:apigateway:$${AWS::Region}:lambda:path/2015-03-31/functions/$${OnConnectFunction.Arn}/invocations
   DisconnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref SimpleWebSocket
-      RouteKey: $disconnect
+      RouteKey: $$disconnect
       AuthorizationType: NONE
       OperationName: DisconnectRoute
       Target: !Join
@@ -58,7 +58,7 @@ Resources:
       IntegrationType: AWS_PROXY
       IntegrationUri: 
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnDisconnectFunction.Arn}/invocations
+            arn:aws:apigateway:$${AWS::Region}:lambda:path/2015-03-31/functions/$${OnDisconnectFunction.Arn}/invocations
   SendRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -78,7 +78,7 @@ Resources:
       IntegrationType: AWS_PROXY
       IntegrationUri: 
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SendMessageFunction.Arn}/invocations
+            arn:aws:apigateway:$${AWS::Region}:lambda:path/2015-03-31/functions/$${SendMessageFunction.Arn}/invocations
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
@@ -112,7 +112,7 @@ Resources:
   OnConnectFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: onconnect/
+      CodeUri: s3://${s3_bucket}/${conn_key}
       Handler: app.handler
       MemorySize: 256
       Runtime: nodejs10.x
@@ -134,7 +134,7 @@ Resources:
   OnDisconnectFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ondisconnect/
+      CodeUri: s3://${s3_bucket}/${disconn_key}
       Handler: app.handler
       MemorySize: 256
       Runtime: nodejs10.x
@@ -156,7 +156,7 @@ Resources:
   SendMessageFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: sendmessage/
+      CodeUri: s3://${s3_bucket}/${msg_key}
       Handler: app.handler
       MemorySize: 256
       Runtime: nodejs10.x
@@ -171,7 +171,7 @@ Resources:
           Action:
           - 'execute-api:ManageConnections'
           Resource:
-          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SimpleWebSocket}/*'
+          - !Sub 'arn:aws:execute-api:$${AWS::Region}:$${AWS::AccountId}:$${SimpleWebSocket}/*'
   SendMessagePermission:
     Type: AWS::Lambda::Permission
     DependsOn:

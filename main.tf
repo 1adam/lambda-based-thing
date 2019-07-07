@@ -7,6 +7,16 @@ data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
 
+data "template_file" "ws_cf_tpl" {
+  template = file("${path.module}/cf_tpl/websocket.yaml.tpl")
+  vars = {
+    s3_bucket = "${aws_s3_bucket.ws_func_deploy.id}"
+    conn_key = "${aws_s3_bucket_object.conn_obj.id}"
+    msg_key = "${aws_s3_bucket_object.msg_obj.id}"
+    disconn_key = "${aws_s3_bucket_object.disconn_obj.id}"
+  }
+}
+
 # todo... break things out into modules, someday! today? nope.
 resource "aws_dynamodb_table" "conns" {
   name = "xg-conns-${terraform.workspace}"
@@ -75,6 +85,36 @@ resource "aws_api_gateway_rest_api" "main" {
   }
 }
 
+resource "aws_s3_bucket" "ws_func_deploy" {
+  bucket_prefix = "xg-${terraform.workspace}-ws-func-"
+  acl = "private"
+  tags = {
+    Project = "xg"
+    Environment = "${terraform.workspace}"
+  }
+}
+
+resource "aws_s3_bucket_object" "conn_obj" {
+  bucket = aws_s3_bucket.ws_func_deploy.id
+  key = "deploy/conn-obj/latest.zip"
+  source = "${var.conn_obj_zipfile}"
+  etag = filemd5("${var.conn_obj_zipfile}")
+}
+
+resource "aws_s3_bucket_object" "msg_obj" {
+  bucket = aws_s3_bucket.ws_func_deploy.id
+  key = "deploy/msg-obj/latest.zip"
+  source = "${var.msg_obj_zipfile}"
+  etag = filemd5("${var.msg_obj_zipfile}")
+}
+
+resource "aws_s3_bucket_object" "disconn_obj" {
+  bucket = aws_s3_bucket.ws_func_deploy.id
+  key = "deploy/disconn-obj/latest.zip"
+  source = "${var.disconn_obj_zipfile}"
+  etag = filemd5("${var.disconn_obj_zipfile}")
+}
+
 resource "aws_cloudformation_stack" "ws_api" {
   name = "xg-${terraform.workspace}-ws"
 
@@ -82,8 +122,8 @@ resource "aws_cloudformation_stack" "ws_api" {
     TableName = "xg_ws_conns"
   }
 
-  template_body = file("${path.module}/cf_tpl/websocket.yaml")
-  capabilities = ["CAPABILITY_IAM"]
+  template_body = data.template_body.ws_cf_tpl.rendered
+  capabilities = ["CAPABILITY_IAM","CAPABILITY_AUTO_EXPAND"]
   tags = {
     Project = "xg"
     Environment = "${terraform.workspace}"
