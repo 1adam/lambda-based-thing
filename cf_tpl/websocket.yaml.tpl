@@ -9,7 +9,7 @@ Parameters:
     Description: (Required) The name of the new DynamoDB to store connection identifiers for each connected clients. Minimum 3 characters
     MinLength: 3
     MaxLength: 50
-    AllowedPattern: ^[A-Za-z_]+$$
+    AllowedPattern: ^[A-Za-z_]+$
     ConstraintDescription: 'Required. Can be characters and underscore only. No numbers or special characters allowed.'
 
 Resources:
@@ -18,12 +18,12 @@ Resources:
     Properties:
       Name: SimpleWebSocket
       ProtocolType: WEBSOCKET
-      RouteSelectionExpression: "$$request.body.action"
+      RouteSelectionExpression: "$request.body.action"
   ConnectRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref SimpleWebSocket
-      RouteKey: $$connect
+      RouteKey: $connect
       AuthorizationType: NONE
       OperationName: ConnectRoute
       Target: !Join
@@ -43,7 +43,7 @@ Resources:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref SimpleWebSocket
-      RouteKey: $$disconnect
+      RouteKey: $disconnect
       AuthorizationType: NONE
       OperationName: DisconnectRoute
       Target: !Join
