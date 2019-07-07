@@ -10,6 +10,8 @@ data "aws_region" "current" {}
 # todo... break things out into modules, someday! today? nope.
 resource "aws_dynamodb_table" "conns" {
   name = "xg-conns-${terraform.workspace}"
+  write_capacity = 5
+  read_capacity = 5
   hash_key = "ConnID"
   range_key = "UserID"
 
@@ -40,6 +42,8 @@ resource "aws_dynamodb_table" "conns" {
 
 resource "aws_dynamodb_table" "users" {
   name = "xg-users-${terraform.workspace}"
+  write_capacity = 5
+  read_capacity = 5
   hash_key = "UserID"
   range_key = "Username"
 
