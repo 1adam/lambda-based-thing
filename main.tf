@@ -12,7 +12,7 @@ data "template_file" "ws_cf_tpl" {
   vars = {
     s3_bucket = "${aws_s3_bucket.ws_func_deploy.id}"
     conn_key = "${aws_s3_bucket_object.conn_obj.id}"
-    msg_key = "${aws_s3_bucket_object.msg_obj.id}"
+    act_key = "${aws_s3_bucket_object.act_obj.id}"
     disconn_key = "${aws_s3_bucket_object.disconn_obj.id}"
   }
 }
@@ -101,11 +101,11 @@ resource "aws_s3_bucket_object" "conn_obj" {
   etag = filemd5("${var.conn_obj_zipfile}")
 }
 
-resource "aws_s3_bucket_object" "msg_obj" {
+resource "aws_s3_bucket_object" "act_obj" {
   bucket = aws_s3_bucket.ws_func_deploy.id
-  key = "deploy/msg-obj/latest.zip"
-  source = "${var.msg_obj_zipfile}"
-  etag = filemd5("${var.msg_obj_zipfile}")
+  key = "deploy/act-obj/latest.zip"
+  source = "${var.act_obj_zipfile}"
+  etag = filemd5("${var.act_obj_zipfile}")
 }
 
 resource "aws_s3_bucket_object" "disconn_obj" {

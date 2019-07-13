@@ -63,7 +63,7 @@ Resources:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref SimpleWebSocket
-      RouteKey: sendmessage
+      RouteKey: sendaction
       AuthorizationType: NONE
       OperationName: SendRoute
       Target: !Join
@@ -78,7 +78,7 @@ Resources:
       IntegrationType: AWS_PROXY
       IntegrationUri: 
         Fn::Sub:
-            arn:aws:apigateway:$${AWS::Region}:lambda:path/2015-03-31/functions/$${SendMessageFunction.Arn}/invocations
+            arn:aws:apigateway:$${AWS::Region}:lambda:path/2015-03-31/functions/$${SendActionFunction.Arn}/invocations
   Deployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
@@ -153,10 +153,10 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref OnDisconnectFunction
       Principal: apigateway.amazonaws.com
-  SendMessageFunction:
+  SendActionFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://${s3_bucket}/${msg_key}
+      CodeUri: s3://${s3_bucket}/${act_key}
       Handler: app.handler
       MemorySize: 256
       Runtime: nodejs10.x
@@ -172,14 +172,14 @@ Resources:
           - 'execute-api:ManageConnections'
           Resource:
           - !Sub 'arn:aws:execute-api:$${AWS::Region}:$${AWS::AccountId}:$${SimpleWebSocket}/*'
-  SendMessagePermission:
+  SendActionPermission:
     Type: AWS::Lambda::Permission
     DependsOn:
       - SimpleWebSocket
-      - SendMessageFunction
+      - SendActionFunction
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref SendMessageFunction
+      FunctionName: !Ref SendActionFunction
       Principal: apigateway.amazonaws.com
 
 Outputs:
@@ -195,9 +195,9 @@ Outputs:
     Description: "OnDisconnect function ARN"
     Value: !GetAtt OnDisconnectFunction.Arn
 
-  SendMessageFunctionArn:
-    Description: "SendMessage function ARN"
-    Value: !GetAtt SendMessageFunction.Arn
+  SendActionFunctionArn:
+    Description: "SendAction function ARN"
+    Value: !GetAtt SendActionFunction.Arn
 
   WebSocketURI:
     Description: "The WSS Protocol URI to connect to"
