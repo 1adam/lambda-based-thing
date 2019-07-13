@@ -1,9 +1,9 @@
 {
   "name": "on-disconnect",
   "version": "1.0.0",
-  "description": "ondisconnect example for WebSockets on API Gateway",
+  "description": "disconnect from api-gw wss",
   "main": "src/app.js",
-  "author": "SAM CLI",
+  "author": "nobody",
   "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.434.0"

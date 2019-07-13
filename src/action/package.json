@@ -1,9 +1,9 @@
 {
-  "name": "send-message",
+  "name": "send-action",
   "version": "1.0.0",
-  "description": "sendmessage example for WebSockets on API Gateway",
+  "description": "sends action to be processed",
   "main": "src/app.js",
-  "author": "SAM CLI",
+  "author": "nobody",
   "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.434.0"
