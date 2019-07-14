@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <script>
+var USERNAME;
+var wsConn;
+
+// def funcs
+function doConnect() {
+  var endpoint = "wss://7sxo98qc6g.execute-api.us-east-1.amazonaws.com/think";
+  try {
+    wsConn = new WebSocket( endpoint );
+    wsConn.onmessage = function(event) {
+      console.log(event.data);
+      var recvBox = document.getElementById("receiveBox");
+      recvBox.value = recvBox.value + (recvBox.value == '' ? '' : '\n') + event.data;
+    };
+    console.log("Connected");
+  } catch (e) {
+    console.log("Conn error");
+  }
+}
+function doDisconnect() {
+  try {
+    wsConn.close();
+    console.log("Disconnected");
+  } catch (e) {
+    console.log("Disconn error");
+  }
+}
+function prepActionData( msg, direction="NotYet", userid="uid123" ) {
+  return '{ "action": "sendaction", "data": "' + USERNAME + ': ' + msg + '"}';
+}
+function sendMessage( dataString ) {
+  try {
+    wsConn.send( dataString );
+  } catch (e) {
+    console.log("Error sending action message");
+  }
+}
+function doMsgThing() {
+  var iBox = document.getElementById("inputBox");
+  var theMsg = prepActionData( iBox.value );
+//  console.log("DEBUG " + theMsg);
+  try {
+     sendMessage(theMsg);
+     iBox.value = "";
+  } catch (e) {
+     console.log("Error sending message");
+  }
+}
+function doLogin() {
+  try {
+    var uname = document.getElementById("loginUsername").value;
+    if ( uname.length > 0 ) {
+      USERNAME = uname;
+    }
+    hideLoginArea();
+    showChatArea();
+  } catch (e) {
+    console.log("Error during login");
+  }
+}
+function hideLoginArea() {
+  var lbox = document.getElementById("loginBox");
+  lbox.style = "display:none;";
+}
+function showChatArea() {
+  var cbox = document.getElementById("chatBox");
+  cbox.style = "display:block;";
+}
+
+function main() {
+  // get things moving
+  doConnect();
+
+  var waitForConn = setInterval( function() {
+      if ( wsConn.readyState == 1 ) {
+          try {
+              var tarea = document.getElementById("inputBox");
+              tarea.removeAttribute("readonly");
+              clearInterval(waitForConn);
+              tarea.value = "";
+          } catch (e) {
+              console.log("Error initially clearing input box");
+          }
+      }
+  }, 1000 );
+};
+main();
+  </script>
+  </head>
+  <body>
+    <div id="loginBox">
+        <input id="loginUsername" size=64 type="text" placeholder="please enter your username here" required="true"/>
+        <button id="loginButton" onClick="doLogin();">log in</button>
+    </div>
+    <div id="chatBox" style="display:none;">
+    received messages
+    <textarea rows=25 cols=80 id="receiveBox" readonly label="received messages"></textarea>
+    <br /><br />
+    send message
+    <textarea rows=5 cols=80 id="inputBox" readonly label="send message">please wait for connection to be ready</textarea>
+    <button id="sendButton" onClick="doMsgThing();">send</button>
+    </div>
+  </body>
+</html>
